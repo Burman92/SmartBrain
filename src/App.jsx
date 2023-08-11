@@ -1,21 +1,27 @@
-import { useState } from 'react'
-import Tilt from 'react-parallax-tilt'
+import { Component } from 'react'
+import Navigation from './Components/Navigation/Navigation'
+import Logo from './Components/Logo/Logo'
+import ImageLinkForm from './Components/ImageLinkForm/ImageLinkForm'
+import Rank from './Components/Rank/Rank'
+import './App.css'
 
 
 
 
-function App() {
+class App extends Component {
 
+render() {
 
   return (
     <>
-      <Tilt>
-        <div style={{height: '300px', backgroundColor:'darkgreen'}}>
-          <h1>Testing the tilt box</h1>
-        </div>
-      </Tilt>
+      <Navigation />
+      <Logo />
+      <Rank />
+      <ImageLinkForm />
+      {/* <FaceRecognition /> */}
     </>
   )
+}
 }
 
 export default App
