@@ -6,40 +6,37 @@ import Rank from './Components/Rank/Rank'
 import './App.css'
 import FaceRecognition from './Components/FaceRecognition/FaceRecognition'
 
-const returnClarifaiRequestOptions= (imageURL) =>{
+
+const returnClarifaiRequestOptions = (imageURL) =>{
   const PAT = 'f74cfa233fe046859640c19a25ce1159';
-
   const USER_ID = 'burmanbed';       
-  const APP_ID = 'Smart-Brain-App';
-
-  const MODEL_ID = 'face-detection';  
-  const IMAGE_URL = imageURL;
+  const APP_ID = 'Smart-Brain-App'; 
+  const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
 
   const raw = JSON.stringify({
     "user_app_id": {
-        "user_id": USER_ID,
-        "app_id": APP_ID
+      "user_id": USER_ID,
+      "app_id": APP_ID
     },
     "inputs": [
-        {
-            "data": {
-                "image": {
-                    "url": IMAGE_URL
-                }
+      {
+        "data": {
+          "image": {
+            "url": IMAGE_URL
             }
+          }
         }
     ]
-});
+  });
 
-const requestOptions = {
-  method: 'POST',
-  headers: {
+  const requestOptions = {
+    method: 'POST',
+    headers: {
       'Accept': 'application/json',
       'Authorization': 'Key ' + PAT
-  },
-  body: raw
+    },
+    body: raw,
 };
-
 return requestOptions
 }
 
@@ -49,26 +46,43 @@ class App extends Component {
     super();
     this.state = {
       input: '',
-      imageURL: ''
+      imageURL: '',
+      box: {}
     }
     }
-onInputChange = (event) => {
-  this.setState({input: event.target.value})
-}
+
+  calculateFaceLocation = (data) => {
+    const clarifiaFace = data.outputs[0].data.regions[0].region_info.bounding_box; 
+    console.log(clarifiaFace)
+    const image = document.getElementById('inputimage');
+    const width = Number(image.width);
+    const height = Number(image.height);
+    return{
+      leftCol: clarifiaFace.left_col * width,
+      topRow: clarifiaFace.top_row * height,
+      rightCol: width - (clarifiaFace.right_col * width),
+      bottomRow: height - (clarifiaFace.bottom_row * height)
+    }
+  }
+
+  displayFaceBox = ( box ) => {
+    this.setState({box: box})
+  }
+
+
+  onInputChange = (event) => {
+    this.setState({input: event.target.value})
+  }
 
 onButtonSubmit = () => {
-  this.setState({imageURL: this.state.input})
-  fetch("https://api.clarifai.com/v2/models/" + 'face-detection' + "/outputs", returnClarifaiRequestOptions(this.state.input))
+  this.setState({imageURL: this.state.input});
+  fetch("https://api.clarifai.com/v2/models/" + "face-detection" + "/versions/" + "6dc7e46bc9124c5c8824be4822abe105" + "/outputs", returnClarifaiRequestOptions(this.state.input))
   .then(response => response.json())
-  // app.models.predict('ac547022a07a4d7bb1e35f661554bd04', 'https://etcanada.com/wp-content/uploads/2023/04/GettyImages-1485003120.jpg?quality=80&strip=all&w=720&h=480&crop=1').then(
-  //   function(response){
-  //     console.log(response)
-  //   },
-  //   function(err){
-
-  //   }
-  // )
+  .then(result => this.displayFaceBox( this.calculateFaceLocation(result) ))
+  .then(data=> console.log(data))
+  .catch(error => console.log('error', error));
 }
+
 
 render() {
 
@@ -83,6 +97,7 @@ render() {
         />
       <FaceRecognition 
       imageURL = {this.state.imageURL}
+      box = {this.state.box}
       /> 
     </>
   )
