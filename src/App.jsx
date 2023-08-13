@@ -5,6 +5,8 @@ import ImageLinkForm from './Components/ImageLinkForm/ImageLinkForm'
 import Rank from './Components/Rank/Rank'
 import './App.css'
 import FaceRecognition from './Components/FaceRecognition/FaceRecognition'
+import SignIn from './Components/SignIn/SignIn'
+import Register from './Components/Register/Register'
 
 
 const returnClarifaiRequestOptions = (imageURL) =>{
@@ -47,21 +49,18 @@ class App extends Component {
     this.state = {
       input: '',
       imageURL: '',
-      box: {}
+      box: {},
+      route: 'signin',
+      isSignedIn: false
     }
     }
 
   calculateFaceLocation = (data) => {
-    console.log("data", data)
     const clarifiaFace = data.outputs[0].data.regions[0].region_info.bounding_box; 
-    console.log("number", clarifiaFace)
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
     const height = Number(image.height);
-    console.log('width', width);
-    console.log('height', height);
-    console.log('evaluation', clarifiaFace.left_col * width, clarifiaFace.top_row * height, width - (clarifiaFace.right_col * width),height - (clarifiaFace.bottom_row * height))
-    return{
+      return{
       leftCol: clarifiaFace.left_col * width,
       topRow: clarifiaFace.top_row * height,
       rightCol: width - (clarifiaFace.right_col * width),
@@ -71,7 +70,6 @@ class App extends Component {
 
   displayFaceBox = ( box ) => {
     this.setState({box: box})
-    console.log("box", box)
   }
 
 
@@ -82,30 +80,46 @@ class App extends Component {
 onButtonSubmit = () => {
   this.setState({imageURL: this.state.input});
   fetch("https://api.clarifai.com/v2/models/" + "face-detection" + "/versions/" + "6dc7e46bc9124c5c8824be4822abe105" + "/outputs", returnClarifaiRequestOptions(this.state.input))
-  // fetch("https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs", returnClarifaiRequestOptions(this.state.input))
   .then(response => response.json())
-  .then(result => 
-    {console.log(result)
-    this.displayFaceBox( this.calculateFaceLocation(result) )})
+  .then(result => this.displayFaceBox( this.calculateFaceLocation(result) ))
   .catch(error => console.log('error', error));
+}
+
+onRouteChange = (route) => {
+  if(route === 'signout'){
+    this.setState({isSignedIn: false})
+  } else if(route === 'home'){
+    this.setState({isSignedIn: true})
+  }
+  this.setState({route: route})
 }
 
 
 render() {
-
+  const {isSignedIn, imageURL, route, box} = this.state
   return (
     <>
-      <Navigation />
-      <Logo />
-      <Rank />
-      <ImageLinkForm
+      <Navigation isSignedIn={isSignedIn} onRouteChange ={this.onRouteChange}/>
+      { route === 'home'
+        ? 
+        <div>
+        <Logo />
+        <Rank />
+        <ImageLinkForm
         onInputChange = { this.onInputChange } 
         onButtonSubmit = { this.onButtonSubmit }
         />
-      <FaceRecognition 
-      imageURL = {this.state.imageURL}
-      box = {this.state.box}
-      /> 
+        <FaceRecognition 
+        imageURL = {imageURL}
+        box = {box}
+        /> 
+      </div>
+      :(
+        route === 'signin' ?
+        <SignIn onRouteChange = {this.onRouteChange}/>
+        :<Register onRouteChange ={this.onRouteChange}/>
+      )
+        } 
     </>
   )
 }
