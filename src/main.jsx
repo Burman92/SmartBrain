@@ -8,6 +8,6 @@ import "./Main.css"
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
-    <ParticlesBg color='grey' num={400} type='cobweb' bg={true}/>
+    <ParticlesBg color='grey' num={150} type='cobweb' bg={true}/>
   </React.StrictMode>,
 )
