@@ -11,7 +11,7 @@ const returnClarifaiRequestOptions = (imageURL) =>{
   const PAT = 'f74cfa233fe046859640c19a25ce1159';
   const USER_ID = 'burmanbed';       
   const APP_ID = 'Smart-Brain-App'; 
-  const IMAGE_URL = 'https://samples.clarifai.com/metro-north.jpg';
+  const IMAGE_URL = imageURL
 
   const raw = JSON.stringify({
     "user_app_id": {
@@ -52,11 +52,15 @@ class App extends Component {
     }
 
   calculateFaceLocation = (data) => {
+    console.log("data", data)
     const clarifiaFace = data.outputs[0].data.regions[0].region_info.bounding_box; 
-    console.log(clarifiaFace)
+    console.log("number", clarifiaFace)
     const image = document.getElementById('inputimage');
     const width = Number(image.width);
     const height = Number(image.height);
+    console.log('width', width);
+    console.log('height', height);
+    console.log('evaluation', clarifiaFace.left_col * width, clarifiaFace.top_row * height, width - (clarifiaFace.right_col * width),height - (clarifiaFace.bottom_row * height))
     return{
       leftCol: clarifiaFace.left_col * width,
       topRow: clarifiaFace.top_row * height,
@@ -67,6 +71,7 @@ class App extends Component {
 
   displayFaceBox = ( box ) => {
     this.setState({box: box})
+    console.log("box", box)
   }
 
 
@@ -77,9 +82,11 @@ class App extends Component {
 onButtonSubmit = () => {
   this.setState({imageURL: this.state.input});
   fetch("https://api.clarifai.com/v2/models/" + "face-detection" + "/versions/" + "6dc7e46bc9124c5c8824be4822abe105" + "/outputs", returnClarifaiRequestOptions(this.state.input))
+  // fetch("https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs", returnClarifaiRequestOptions(this.state.input))
   .then(response => response.json())
-  .then(result => this.displayFaceBox( this.calculateFaceLocation(result) ))
-  .then(data=> console.log(data))
+  .then(result => 
+    {console.log(result)
+    this.displayFaceBox( this.calculateFaceLocation(result) )})
   .catch(error => console.log('error', error));
 }
 
