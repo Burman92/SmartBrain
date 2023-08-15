@@ -1,15 +1,18 @@
 import express from "express";
-import bodyParser from "body-parser";
+import bcrypt from "bcrypt-nodejs"
+import cors from 'cors'
+// const bcrypt = require('bcrypt-nodejs')
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 const database = {
     users: [
         {
             id: '123',
             name: 'john',
             email: 'john@gmail.com',
-            password: 'johny',
+            password: 'cookies',
             entries: 0,
             joined: new Date()
         },
@@ -17,17 +20,16 @@ const database = {
             id: '124',
             name: 'james',
             email: 'james@gmail.com',
-            password: 'jammy',
+            password: 'bananas', 
             entries: 0,
             joined: new Date()
-        },
+        }
+    ],
+    login: [
         {
-            id: '125',
-            name: 'dora',
-            email: 'dora@gmail.com',
-            password: 'donut',
-            entries: 0,
-            joined: new Date()
+            id: '987',
+            hash: '',
+            email: 'john@gmail.com'
         }
     ]
 }
@@ -35,8 +37,17 @@ const database = {
 app.get("/",(req,res)=>{
     res.send(database.users)
 })
-
 app.post("/signin", (req, res)=>{
+    // bcrypt.hash(password, null, null, function(err, hash) {
+    //     console.log(hash)
+    // });
+    // Load hash from your password DB.
+    // bcrypt.compare("apples", '$2a$10$7htgVZk2tABCa85MNkyS0O/pHHeO4bUAdghMwIqOpJCd/wQzUEbNe', function(err, res) {
+    //     console.log('first guess', res)
+    // });
+    // bcrypt.compare("veggies", '$2a$10$7htgVZk2tABCa85MNkyS0O/pHHeO4bUAdghMwIqOpJCd/wQzUEbNe', function(err, res) {
+    //     console.log('second guess', res)
+    // });
     if(req.body.email === database.users[0].email &&
         req.body.password === database.users[0].password){
             res.json('success')
@@ -51,7 +62,6 @@ app.post('/register', (req, res)=>{
         id: '126',
         name: name,
         email: email,
-        password: password,
         entries: 0,
         joined: new Date()
     })
@@ -86,6 +96,9 @@ app.put('/image', (req, res)=>{
         res.status(400).json('not found')
     }
 })
+
+
+
 
 
 
