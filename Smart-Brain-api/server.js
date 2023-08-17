@@ -22,13 +22,19 @@ app.use(cors())
 app.get("/",(req,res)=>{
     res.send('success')
 })
+
+//signin
 app.post("/signin", (req, res)=>{
+    const { password, email }= req.body
+    if(!email || !password){
+        return res.status(400).json('incorrect form submission')
+    }
     pg.select('email', 'hash').from('login')
-    .where('email', '=', req.body.email)
+    .where('email', '=', email)
     .then(data =>{
-        const isValid = bcrypt.compareSync(req.body.password, data[0].hash)
+        const isValid = bcrypt.compareSync(password, data[0].hash)
         if(isValid){
-            return pg.select('*').from('users').where('email', '=', req.body.email)
+            return pg.select('*').from('users').where('email', '=', email)
             .then(user => {
                 res.json(user[0])
             })
@@ -40,8 +46,12 @@ app.post("/signin", (req, res)=>{
     .catch(err => res.status(400).json('wrong credentials'))
 })
 
+//register
 app.post('/register', (req, res)=>{
-    const {email, name, password}= req.body
+    const {email, name, password}= req.body;
+    if(!email || !name || !password){
+        return res.status(400).json('incorrect form submission')
+    }
     const hash = bcrypt.hashSync(password);
         pg.transaction(trx => {
             return trx.insert({
@@ -68,6 +78,8 @@ app.post('/register', (req, res)=>{
     .catch(err => res.status(400).json("unable to register"))
 })
 
+
+//profile
 app.get('/profile/:id', (req, res)=>{
     const {id} = req.params
     pg.select('*').from('users').where({
@@ -83,6 +95,7 @@ app.get('/profile/:id', (req, res)=>{
     .catch(err=> res.status(400).json('error getting user'))
 })
 
+//entries
 app.put('/image', (req, res)=>{
     const {id} = req.body;
     pg('users').where('id', '=', id)
