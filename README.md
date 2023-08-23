@@ -6,12 +6,8 @@ A Full-Stack React application that scans images, detects faces and outlines the
 ## Table of Contents
 * [Technologies](#technologies)
 * [Installation](#installation)
-* [Usage](#usage)
 * [Screenshot](#screenshot)
-* [Contributors](#contributors)
-* [Tests](#tests)
 * [Questions](#questions)
-* [License](#license)
 
 ## Technologies
 - [`react`](https://react.dev) - Library for web and native user interfaces.
